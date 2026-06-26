@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>あなたの守護獣診断 Ver.1.0</title>
+<style>
+*{box-sizing:border-box}
+:root{
+  --pink:#ff4f91;
+  --pink2:#ff8ab8;
+  --purple:#8b5cf6;
+  --bg:#05050b;
+  --glass:rgba(255,255,255,.075);
+  --line:rgba(255,255,255,.15);
+  --text:#fff;
+  --muted:#d9d0dc;
+}
+body{
+  margin:0;
+  min-height:100vh;
+  font-family:-apple-system,BlinkMacSystemFont,"Hiragino Mincho ProN","Yu Mincho","Hiragino Sans","Yu Gothic",serif;
+  color:var(--text);
+  background:
+    radial-gradient(circle at 12% 12%,rgba(255,79,145,.26),transparent 28%),
+    radial-gradient(circle at 84% 10%,rgba(139,92,246,.22),transparent 28%),
+    radial-gradient(circle at 50% 95%,rgba(255,138,184,.13),transparent 44%),
+    linear-gradient(145deg,#020204,#080913 42%,#17081b);
+  padding:14px;
+  overflow-x:hidden;
+}
+body:before{
+  content:"";
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  background-image:
+    radial-gradient(circle,rgba(255,255,255,.42) 1px,transparent 1.7px),
+    radial-gradient(circle,rgba(255,150,190,.30) 1px,transparent 1.7px);
+  background-size:86px 86px,132px 132px;
+  background-position:8px 20px,48px 78px;
+  opacity:.22;
+}
+.wrap{
+  max-width:880px;
+  margin:0 auto;
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  position:relative;
+}
+.screen{
+  width:100%;
+  display:none;
+  min-height:92vh;
+  flex-direction:column;
+  justify-content:center;
+  padding:32px;
+  border-radius:34px;
+  background:linear-gradient(145deg,rgba(255,255,255,.075),rgba(255,255,255,.035));
+  border:1px solid var(--line);
+  box-shadow:0 28px 76px rgba(0,0,0,.56),inset 0 0 0 1px rgba(255,255,255,.04);
+  overflow:hidden;
+}
+.screen.active{display:flex;animation:fade .28s ease}
+@keyframes fade{from{opacity:.4;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.hero{
+  position:relative;
+  background:
+    linear-gradient(rgba(0,0,0,.28),rgba(0,0,0,.74)),
+    radial-gradient(circle at 50% 12%,rgba(255,79,145,.24),transparent 29%),
+    radial-gradient(circle at 20% 84%,rgba(139,92,246,.14),transparent 34%),
+    linear-gradient(145deg,#080914,#170918);
+}
+.hero:before{
+  content:"♡";
+  position:absolute;
+  top:34px;
+  left:34px;
+  color:#ff7bab;
+  font-size:34px;
+  text-shadow:0 0 18px rgba(255,74,135,.78);
+}
+.hero:after{
+  content:"";
+  position:absolute;
+  inset:auto -40px -80px -40px;
+  height:190px;
+  opacity:.42;
+  background:radial-gradient(ellipse at center,rgba(255,79,145,.22),transparent 62%);
+}
+.badge{
+  display:inline-block;
+  width:max-content;
+  max-width:100%;
+  padding:8px 15px;
+  border-radius:999px;
+  color:#ffd0e0;
+  background:rgba(255,79,145,.14);
+  border:1px solid rgba(255,138,184,.34);
+  margin-bottom:18px;
+  font-size:13px;
+  letter-spacing:.06em;
+}
+h1{
+  margin:0 0 16px;
+  font-size:38px;
+  line-height:1.25;
+  letter-spacing:.07em;
+  text-shadow:0 0 24px rgba(255,132,174,.22);
+}
+h2{margin:0 0 22px;font-size:24px;line-height:1.48;letter-spacing:.03em}
+h3{margin:0 0 12px;color:#ffe2ec}
+p{margin:0 0 18px;color:#eee7ef;line-height:1.9}
+.small{font-size:13px;color:#aea5b0;line-height:1.7}
+.vertical{
+  writing-mode:vertical-rl;
+  position:absolute;
+  right:26px;
+  top:74px;
+  color:#ffc0d4;
+  letter-spacing:.2em;
+  font-size:15px;
+  line-height:1.8;
+}
+.hero-title{
+  font-size:44px;
+  margin-top:112px;
+  margin-bottom:10px;
+}
+.script{
+  font-family:cursive;
+  font-size:40px;
+  color:#ff5d9a;
+  opacity:.75;
+  margin:-8px 0 20px 8px;
+}
+.features{
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr;
+  gap:12px;
+  margin:24px 0 20px;
+}
+.feature{
+  text-align:center;
+  padding:16px 8px;
+  border-radius:22px;
+  background:rgba(255,255,255,.055);
+  border:1px solid rgba(255,120,166,.18);
+  color:#f9dce8;
+  line-height:1.65;
+  font-size:13px;
+}
+.feature .ico{font-size:28px;display:block;margin-bottom:8px}
+button{font:inherit}
+.btn,.answer{
+  display:block;
+  width:100%;
+  color:#fff;
+  border-radius:20px;
+  margin-top:13px;
+  padding:17px 18px;
+  cursor:pointer;
+  text-decoration:none;
+}
+.btn{
+  text-align:center;
+  font-weight:700;
+  letter-spacing:.08em;
+  background:linear-gradient(90deg,#f14b83,#b12c65);
+  box-shadow:0 0 25px rgba(255,74,135,.34),0 15px 35px rgba(0,0,0,.35);
+  border:1px solid rgba(255,181,207,.22);
+}
+.answer{
+  text-align:left;
+  background:rgba(255,255,255,.072);
+  border:1px solid rgba(255,255,255,.13);
+  line-height:1.65;
+}
+.answer strong{display:block;color:#ffe1ec;margin-bottom:4px}
+.answer:hover,.btn:hover{filter:brightness(1.06)}
+.progress{color:#ffc4d8;margin-bottom:12px;font-size:14px}
+.bar{height:8px;border-radius:999px;background:rgba(255,255,255,.12);overflow:hidden;margin-bottom:22px}
+.fill{height:100%;background:linear-gradient(90deg,#ff5d9a,#be4dff);border-radius:999px;transition:.25s}
+.axis{
+  margin:10px 0 18px;
+  padding:13px;
+  border-radius:18px;
+  background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.10);
+  color:#e9dce7;
+  font-size:13px;
+  line-height:1.65;
+}
+label{display:block;margin:14px 0 6px;color:#fff;font-size:14px}
+input,select{
+  width:100%;
+  padding:16px;
+  border-radius:17px;
+  border:none;
+  background:#fff;
+  color:#1f2937;
+  font-size:16px;
+  outline:none;
+  box-shadow:0 8px 20px rgba(0,0,0,.14);
+}
+input::placeholder{color:#a0a0a0}
+select{background:#fff;color:#1f2937}
+.required{color:#ff8ab7}
+.notice{
+  margin:12px 0 14px;
+  padding:14px;
+  border-radius:18px;
+  background:rgba(255,255,255,.10);
+  border:1px solid rgba(255,255,255,.12);
+  color:#efe7ef;
+  line-height:1.8;
+  font-size:14px;
+}
+.check{display:flex;gap:10px;align-items:center;margin-top:16px;color:#d9d0d9;line-height:1.6}
+.check input{width:24px;height:24px;margin:0;box-shadow:none}
+.register-card{
+  background:
+    radial-gradient(circle at top left,rgba(255,74,135,.22),transparent 34%),
+    linear-gradient(145deg,rgba(92,55,135,.92),rgba(48,27,82,.94));
+}
+.birthday-row{display:flex;gap:10px}
+.birthday-row input:nth-child(1){flex:1}
+.birthday-row input:nth-child(2),.birthday-row input:nth-child(3){flex:.7}
+.result-hero{
+  text-align:center;
+  padding:28px 18px;
+  border-radius:30px;
+  background:
+    radial-gradient(circle at top,rgba(255,255,255,.18),transparent 38%),
+    linear-gradient(145deg,rgba(255,74,135,.16),rgba(139,92,246,.18));
+  border:1px solid rgba(255,255,255,.15);
+  margin-bottom:16px;
+}
+.guardian{
+  font-size:74px;
+  filter:drop-shadow(0 0 18px rgba(255,120,166,.34));
+  margin:8px 0;
+}
+.type-code{
+  display:inline-block;
+  padding:8px 16px;
+  border-radius:999px;
+  background:rgba(0,0,0,.25);
+  border:1px solid rgba(255,255,255,.16);
+  color:#ffc9dc;
+  letter-spacing:.12em;
+  font-weight:800;
+}
+.type-name{font-size:30px;font-weight:900;letter-spacing:.05em;margin:8px 0}
+.section{
+  margin-top:15px;
+  padding:20px;
+  border-radius:24px;
+  background:rgba(255,255,255,.07);
+  border:1px solid rgba(255,255,255,.12);
+}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.mini{
+  padding:15px;
+  border-radius:18px;
+  background:rgba(255,255,255,.075);
+  border:1px solid rgba(255,255,255,.11);
+  line-height:1.65;
+}
+.score-row{margin:14px 0}
+.score-head{display:flex;justify-content:space-between;color:#f3dcea;font-size:14px;margin-bottom:7px}
+.score-bar{height:9px;border-radius:999px;background:rgba(255,255,255,.12);overflow:hidden}
+.score-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,#ff5d9a,#b15cff)}
+.zukan{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-top:12px}
+.zukan div{
+  text-align:center;
+  padding:12px 4px;
+  border-radius:16px;
+  background:rgba(255,255,255,.075);
+  border:1px solid rgba(255,255,255,.1);
+  font-size:22px;
+}
+.zukan span{display:block;font-size:10px;color:#d7ccd7;margin-top:5px}
+.locked{opacity:.42;filter:grayscale(1)}
+.error{display:none;color:#ffd0df;margin-top:10px;font-size:14px}
+.success{display:none;color:#c8ffd8;margin-top:10px;font-size:14px}
+.loading{display:none;margin-top:12px;color:#ffd0df;font-size:14px}
+.share-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.ghost{
+  background:rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.14);
+  box-shadow:none;
+}
+@media(max-width:560px){
+  body{padding:10px}
+  .wrap{align-items:flex-start}
+  .screen{padding:23px;border-radius:28px;min-height:calc(100vh - 20px)}
+  h1{font-size:28px}
+  h2{font-size:21px}
+  .hero-title{font-size:36px;margin-top:118px}
+  .features{grid-template-columns:1fr 1fr 1fr;gap:8px}
+  .feature{font-size:11px;padding:13px 4px}
+  .feature .ico{font-size:24px}
+  .vertical{right:18px;top:70px;font-size:13px}
+  .grid,.share-row{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<section class="screen hero active" id="top">
+  <div class="vertical">あなたの恋愛を見守る一匹がいる。</div>
+  <span class="badge">Ver.1.0</span>
+  <h1 class="hero-title">あなたの<br>守護獣診断</h1>
+  <div class="script">Guardian</div>
+  <p>夜の森で、あなたを見守る一匹がいる。<br>12の質問から、まだ知らない自分と出会おう。</p>
+  <div class="features">
+    <div class="feature"><span class="ico">🌙</span>夜の森の<br>世界観</div>
+    <div class="feature"><span class="ico">💘</span>恋愛傾向が<br>わかる</div>
+    <div class="feature"><span class="ico">🐺</span>16匹の<br>守護獣</div>
+  </div>
+  <button class="btn" type="button" data-next="story">診断を始める</button>
+  <p class="small" style="text-align:center;margin-top:16px;">登録すると、あなたの守護獣が目を覚まします。</p>
+</section>
+
+<section class="screen" id="story">
+  <span class="badge">夜の森の物語</span>
+  <h1>人の心には、<br>見えない森がある。</h1>
+  <p>恋をした時、その森には一匹の守護獣が現れます。</p>
+  <p>優しさ、情熱、自由、安心感。あなたの恋愛に宿る本質を、守護獣がそっと映し出します。</p>
+  <button class="btn" type="button" data-next="gender">次へ</button>
+</section>
+
+<section class="screen" id="gender">
+  <span class="badge">STEP 1</span>
+  <h1>あなたの性別は？</h1>
+  <p>性別によって、診断結果の言い回しや相性コメントを変える想定です。</p>
+  <button class="answer" type="button" data-next="quiz"><strong>男性</strong>男性向けの結果文で診断</button>
+  <button class="answer" type="button" data-next="quiz"><strong>女性</strong>女性向けの結果文で診断</button>
+  <button class="answer" type="button" data-next="quiz"><strong>その他</strong>中性的な結果文で診断</button>
+  <button class="answer" type="button" data-next="quiz"><strong>回答しない</strong>共通の結果文で診断</button>
+</section>
+
+<section class="screen" id="quiz">
+  <div class="progress" id="progress">質問 1 / 12</div>
+  <div class="bar"><div class="fill" id="quizFill" style="width:8%"></div></div>
+  <h2 id="questionTitle"></h2>
+  <div class="axis" id="axisHint"></div>
+  <div id="choices"></div>
+</section>
+
+<section class="screen register-card" id="register">
+  <span class="badge">診断完了</span>
+  <h1>結果を見るために<br>登録する</h1>
+  <p>「あなたの守護獣診断」に登録すると、あなたの守護獣の正体を確認できます。</p>
+  <div class="notice">※登録は無料です。<br>※「<span class="required">*</span>」が付いている項目は必須です。</div>
+
+  <label>メールアドレス（ユーザーネーム） <span class="required">*</span></label>
+  <input id="email" type="email" placeholder="例）example@gmail.com">
+
+  <label>パスワード <span class="required">*</span></label>
+  <input id="password" type="password" placeholder="8文字以上で入力してください">
+
+  <label>ニックネーム（任意）</label>
+  <input type="text" placeholder="例）ゆう / さくら / Moon">
+
+  <label>性別（任意）</label>
+  <select id="registerGender"><option>回答しない</option><option>男性</option><option>女性</option><option>その他</option></select>
+
+  <label>生年月日（任意）</label>
+  <div class="birthday-row">
+    <input id="birthYear" type="text" inputmode="numeric" placeholder="1998">
+    <input id="birthMonth" type="text" inputmode="numeric" placeholder="10">
+    <input id="birthDay" type="text" inputmode="numeric" placeholder="25">
+  </div>
+  <div class="small" style="margin-top:8px;">年・月・日を入力してください（例：1998 / 10 / 25）</div>
+
+  <label>SNS ID（任意）</label>
+  <input type="text" placeholder="例）@instagram_id や @x_id">
+
+  <label class="check"><input id="agree" type="checkbox"><span>利用規約とプライバシーポリシーに同意します</span></label>
+  <div class="notice">登録内容はGoogleフォーム経由でスプレッドシートに保存されます。</div>
+  <button class="btn" type="button" id="showResultBtn">登録して結果を見る</button>
+  <div class="loading" id="saveLoading">スプレッドシートへ送信中...</div>
+  <div class="success" id="saveSuccess">登録情報を送信しました。</div>
+  <div class="error" id="registerError">メールアドレス・パスワード・同意チェックを確認してください。</div>
+  <p class="small" style="text-align:center;margin-top:14px;">※です。Googleスプレッドシートに登録情報が送信されます。</p>
+</section>
+
+<section class="screen" id="result">
+  <span class="badge">GUARDIAN RESULT</span>
+  <h1>あなたの守護獣</h1>
+  <div class="result-hero">
+    <div class="type-code" id="resultCode"></div>
+    <div class="guardian" id="resultIcon"></div>
+    <div class="type-name" id="resultName"></div>
+    <p id="resultSub"></p>
+  </div>
+  <div class="section"><h3>守護獣の物語</h3><p id="resultStory"></p></div>
+  <div class="section"><h3>恋愛タイプ</h3><p id="loveType"></p></div>
+  <div class="section">
+    <h3>恋愛パラメーター</h3>
+    <div class="score-row"><div class="score-head"><span>愛情重視</span><span id="scoreHText"></span></div><div class="score-bar"><div class="score-fill" id="scoreH"></div></div></div>
+    <div class="score-row"><div class="score-head"><span>刺激重視</span><span id="scorePText"></span></div><div class="score-bar"><div class="score-fill" id="scoreP"></div></div></div>
+    <div class="score-row"><div class="score-head"><span>リード力</span><span id="scoreLText"></span></div><div class="score-bar"><div class="score-fill" id="scoreL"></div></div></div>
+    <div class="score-row"><div class="score-head"><span>理想追求</span><span id="scoreDText"></span></div><div class="score-bar"><div class="score-fill" id="scoreD"></div></div></div>
+  </div>
+  <div class="section"><h3>相性BEST3</h3><div class="grid"><div class="mini" id="match1"></div><div class="mini" id="match2"></div><div class="mini" id="match3"></div><div class="mini" id="weak"></div></div></div>
+  <div class="section"><h3>恋愛攻略アドバイス</h3><div class="grid"><div class="mini" id="advice1"></div><div class="mini" id="advice2"></div><div class="mini" id="advice3"></div><div class="mini" id="advice4"></div></div></div>
+  <div class="section">
+    <h3>あなたの守護獣図鑑</h3>
+    <p class="small">診断を増やしていくと、あなたの中にある別の守護獣の一面も見えてきます。</p>
+    <div class="zukan" id="zukan"></div>
+  </div>
+  <div class="section">
+    <h3>次におすすめ</h3>
+    <p>あなたと相性が良い守護獣を診断してみませんか？</p>
+    <div class="share-row">
+      <button class="btn ghost" type="button" id="shareBtn">結果をシェアする</button>
+      <button class="btn" type="button" id="restartBtn">もう一度診断する</button>
+    </div>
+  </div>
+</section>
+
+</div>
+
+<script>
+/* Googleフォーム連携設定 */
+const GOOGLE_FORM_ACTION = "https://docs.google.com/forms/d/e/1FAIpQLSfS9neewO7FPmXKkbVZHyE94X8YOWsSKXYHNJnvZL6V04sBGw/formResponse";
+const GOOGLE_FORM_ENTRY = {
+  email: "entry.1994390248",
+  password: "entry.1476351530",
+  nickname: "entry.1921756206",
+  gender: "entry.471367138",
+  birthday: "entry.396113802",
+  sns: "entry.317282414"
+};
+
+const questions = [
+  {q:"恋人との理想の距離感は？",hint:"Heart ⇔ Freedom：愛情重視か、自由重視かを見ています。",a:[
+    ["A. できるだけ近くにいたい","好きな人とは日常的につながっていたい","H",2],
+    ["B. 一人の時間も大切にしたい","好きでも自分の世界は守りたい","F",2],
+    ["C. 相手が求める距離に合わせたい","関係の空気を見ながら調整したい","W",1],
+    ["D. その時の気分で変わる","近い日もあれば離れたい日もある","D",1]
+  ]},
+  {q:"恋愛で一番大事なのは？",hint:"Calm ⇔ Passion：安心を求めるか、刺激を求めるかを見ています。",a:[
+    ["A. 安心感","落ち着ける関係が一番","C",2],
+    ["B. ドキドキ","刺激がないと恋が物足りない","P",2],
+    ["C. 信頼","深く分かり合えることが大切","H",1],
+    ["D. 自由","束縛されすぎない関係がいい","F",1]
+  ]},
+  {q:"デートで惹かれる雰囲気は？",hint:"Dream ⇔ Reality：理想を大切にするか、現実的な心地よさを大切にするかを見ています。",a:[
+    ["A. 夜景やムード","特別感のある時間に弱い","D",2],
+    ["B. アクティブな遊び","一緒に盛り上がりたい","P",1],
+    ["C. 家でまったり","自然体でいられる時間が好き","R",2],
+    ["D. 予想外の展開","予定通りよりサプライズ感が好き","F",1]
+  ]},
+  {q:"好きになった時の行動は？",hint:"Lead ⇔ Follow：自分から動くか、相手や空気に合わせるかを見ています。",a:[
+    ["A. すぐ態度に出る","好きが隠せない","L",2],
+    ["B. 慎重に様子を見る","失敗したくないから見極める","R",1],
+    ["C. 自然に距離を詰める","会話や空気で仲良くなる","W",2],
+    ["D. 少し駆け引きする","相手の反応を見たい","F",1]
+  ]},
+  {q:"恋人に求める魅力は？",hint:"愛情・刺激・安心・理想のうち、何に強く反応するかを見ています。",a:[
+    ["A. テクニックや色気","大人っぽい魅力に惹かれる","P",2],
+    ["B. 愛情表現","好きが伝わる行動が大事","H",2],
+    ["C. 優しさ","安心できる相手がいい","C",2],
+    ["D. 世界観や雰囲気","その人だけの空気感に惹かれる","D",2]
+  ]},
+  {q:"夜のデートなら？",hint:"自由・理想・現実・刺激のバランスを見ています。",a:[
+    ["A. ホテルステイ","二人だけの特別感が好き","D",2],
+    ["B. ドライブ","自由で少し非日常な時間が好き","F",2],
+    ["C. バー","大人っぽいムードが好き","P",1],
+    ["D. 家でまったり","自然体で安心できる時間が好き","C",2]
+  ]},
+  {q:"二人きりの時は？",hint:"Lead ⇔ Follow：夜の相性に関わる主導権の傾向を見ています。",a:[
+    ["A. 甘えたい","普段より素直になりたい","W",2],
+    ["B. 甘えられたい","求められると嬉しい","H",1],
+    ["C. リードしたい","自分のペースで進めたい","L",2],
+    ["D. 相手次第","空気に合わせるのが好き","W",1]
+  ]},
+  {q:"恋愛で不安になる瞬間は？",hint:"あなたが恋愛で何を失うと不安になるかを見ています。",a:[
+    ["A. 連絡が少ない時","気持ちが見えないと不安","H",2],
+    ["B. 束縛される時","自由がなくなるのが苦手","F",2],
+    ["C. 本音が分からない時","深く知りたい","D",1],
+    ["D. マンネリ化した時","刺激がなくなると冷めやすい","P",2]
+  ]},
+  {q:"リードする？されたい？",hint:"Lead ⇔ Follow：恋愛での立ち位置を見ています。",a:[
+    ["A. リードされたい","安心して任せたい","W",2],
+    ["B. 自分がリードしたい","主導権を持ちたい","L",2],
+    ["C. 相談して決めたい","対等がいい","R",1],
+    ["D. 場面で変わる","雰囲気次第","D",1]
+  ]},
+  {q:"理想の夜の雰囲気は？",hint:"Calm ⇔ Passion と Dream ⇔ Reality の組み合わせを見ています。",a:[
+    ["A. 甘いムード","優しく大切にされたい","H",1,"D",1],
+    ["B. 情熱的","ドキドキ重視","P",2],
+    ["C. 落ち着いた空気","安心して過ごしたい","C",2],
+    ["D. 遊び心あり","楽しさも大事","F",1,"P",1]
+  ]},
+  {q:"恋人とケンカした時は？",hint:"現実派か理想派か、愛情表現の出し方を見ています。",a:[
+    ["A. すぐ仲直りしたい","長引くのが苦手","H",1,"C",1],
+    ["B. 一度距離を置く","冷静になりたい","F",1,"R",1],
+    ["C. 話し合いたい","原因を解決したい","R",2],
+    ["D. 雰囲気で戻す","深刻になりすぎたくない","W",1,"D",1]
+  ]},
+  {q:"あなたの恋愛スタイルに近いのは？",hint:"最終質問：あなたの恋愛の芯を見ています。",a:[
+    ["A. 尽くすタイプ","好きな人を大切にしたい","H",2],
+    ["B. 追わせるタイプ","余裕を持っていたい","L",1,"F",1],
+    ["C. 深く向き合うタイプ","本音で繋がりたい","D",1,"C",1],
+    ["D. 楽しませるタイプ","一緒に笑っていたい","P",1,"W",1]
+  ]}
+];
+
+const typeMap = {
+  HCLD:"rabbit", HCLR:"deer", HCWD:"panda", HCWR:"penguin",
+  HPLD:"wolf", HPLR:"lion", HPWD:"swan", HPWR:"dog",
+  FCLD:"dolphin", FCLR:"owl", FCWD:"butterfly", FCWR:"octopus",
+  FPLD:"tiger", FPLR:"eagle", FPWD:"fox", FPWR:"cat"
+};
+
+const types = {
+ rabbit:{icon:"🐰",code:"HCLD",name:"甘えんぼウサギ",sub:"安心を守る、温もりの守護獣",story:"寂しい夜ほど誰かの温もりを探す守護獣。愛されることで、もっと優しくなれるタイプです。",love:"好きな人にはまっすぐ甘えたい愛情型。安心感と優しい言葉があるほど、魅力が開きます。",scores:[96,44,36,72],matches:["🐺 孤高のオオカミ","🦌 癒しのシカ","🐶 忠実なイヌ"],weak:"自由すぎる相手",adv:["愛情表現が素直で可愛いところ。","不安を抱え込みやすいところ。","寂しい時は我慢せず伝える。","安心感がある相手と相性抜群。"]},
+ deer:{icon:"🦌",code:"HCLR",name:"癒しのシカ",sub:"優しさを守る、森の導き手",story:"夜の森で迷った人を静かに導く守護獣。争いを好まず、相手の心をそっと包みます。",love:"穏やかで現実的な愛情型。派手さより、毎日の優しさや信頼を大切にします。",scores:[88,34,42,46],matches:["🐰 甘えんぼウサギ","🐧 誠実なペンギン","🐺 孤高のオオカミ"],weak:"刺激だけを求める相手",adv:["受け止める力と安心感。","我慢しすぎると本音が消える。","嫌なことは小さく言葉にする。","落ち着いた関係で深まるタイプ。"]},
+ panda:{icon:"🐼",code:"HCWD",name:"ゆるふわパンダ",sub:"癒やしを守る、のんびり守護獣",story:"急がず焦らず、恋をゆっくり育てる守護獣。何もしていなくても周りを笑顔にします。",love:"愛情深く、相手に合わせる柔らかいタイプ。自然体で過ごせる関係に向いています。",scores:[84,30,34,68],matches:["🐱 気まぐれネコ","🦌 癒しのシカ","🐬 微笑みのイルカ"],weak:"急かしてくる相手",adv:["自然体の癒し力。","受け身に見えやすいところ。","嬉しい反応を少し大きめに出す。","穏やかで甘い空気に強いタイプ。"]},
+ penguin:{icon:"🐧",code:"HCWR",name:"誠実なペンギン",sub:"約束を守る、一途な守護獣",story:"好きになったら最後まで。派手ではないけれど、裏切らない誠実さを持つ守護獣です。",love:"現実的で長続きする恋を求めるタイプ。信頼と約束を何より大切にします。",scores:[94,28,46,28],matches:["🐶 忠実なイヌ","🦉 賢者のフクロウ","🦌 癒しのシカ"],weak:"軽すぎる相手",adv:["一途さと信頼感。","慎重すぎてチャンスを逃すことも。","好意は早めに小さく出す。","安定した関係で深く愛するタイプ。"]},
+ wolf:{icon:"🐺",code:"HPLD",name:"孤高のオオカミ",sub:"信頼を守る、夜の森の守護獣",story:"夜の森の頂上に一匹で立つ守護獣。簡単には心を開かないけれど、一度決めた相手を深く守ります。",love:"愛情深く情熱的で、リード力もあるタイプ。本気の恋ほど強くなります。",scores:[92,82,88,76],matches:["🐰 甘えんぼウサギ","🦌 癒しのシカ","🐶 忠実なイヌ"],weak:"信頼を軽く扱う相手",adv:["本気の相手を深く守れるところ。","気持ちを隠しすぎると誤解されやすい。","安心できる言葉を増やす。","信頼とムードが揃うほど魅力が出るタイプ。"]},
+ lion:{icon:"🦁",code:"HPLR",name:"王者のライオン",sub:"勇気を守る、森の王",story:"夜の森を堂々と歩く王の守護獣。強く見えるけれど、好きな人の前でだけ弱さを見せます。",love:"愛情と現実感を持つ頼れるリーダータイプ。恋人を守り、支えようとします。",scores:[86,76,95,54],matches:["🦊 魅惑のキツネ","🐶 忠実なイヌ","🐰 甘えんぼウサギ"],weak:"張り合いすぎる相手",adv:["包容力と決断力。","強く出すぎると相手が遠慮する。","相手の意見を聞く時間を作る。","頼られるほど魅力が増すタイプ。"]},
+ swan:{icon:"🦢",code:"HPWD",name:"月夜のハクチョウ",sub:"美しさを守る、満月の守護獣",story:"満月の夜にだけ現れる美しい守護獣。恋を芸術のように大切にします。",love:"ロマンチックで情熱もある理想派。特別感のある恋に心を奪われます。",scores:[82,72,42,92],matches:["🐯 情熱のトラ","🦉 賢者のフクロウ","🦊 魅惑のキツネ"],weak:"雑すぎる相手",adv:["ムード作りと美意識。","理想が高くなりすぎることも。","完璧より自然体を大切に。","特別感のある夜で輝くタイプ。"]},
+ dog:{icon:"🐶",code:"HPWR",name:"忠実なイヌ",sub:"絆を守る、優しい守護獣",story:"森で一番優しい守護獣。好きな人の笑顔を見ることが、自分の幸せになります。",love:"愛情深く情熱的だけど、相手に合わせる優しさを持つタイプ。尽くす恋に向いています。",scores:[98,64,50,36],matches:["🦁 王者のライオン","🐧 誠実なペンギン","🐰 甘えんぼウサギ"],weak:"感謝を伝えない相手",adv:["誠実さと愛情表現。","尽くしすぎて疲れることも。","自分の希望も言葉にする。","長く温かい恋に向くタイプ。"]},
+ dolphin:{icon:"🐬",code:"FCLD",name:"微笑みのイルカ",sub:"笑顔を守る、湖の守護獣",story:"森の湖に住み、笑顔が消えた人を元気にする守護獣。一緒にいるだけで空気が明るくなります。",love:"自由だけど優しく、リードもできる社交型。楽しい関係を自然に作れます。",scores:[52,58,70,70],matches:["🦋 夢見るチョウ","🐶 忠実なイヌ","🐙 七変化のタコ"],weak:"重すぎる相手",adv:["明るさと親しみやすさ。","本音を隠して場を整えがち。","自分の気持ちも大切にする。","会話と笑顔で距離を縮めるタイプ。"]},
+ owl:{icon:"🦉",code:"FCLR",name:"賢者のフクロウ",sub:"知恵を守る、静かな夜の守護獣",story:"森で最も物知りな守護獣。感情に流されず、相手の本音を静かに見抜きます。",love:"自由と冷静さを持つ現実派。大人の距離感と信頼関係を大切にします。",scores:[44,40,68,38],matches:["🐧 誠実なペンギン","🦢 月夜のハクチョウ","🐙 七変化のタコ"],weak:"感情的すぎる相手",adv:["冷静さと理解力。","考えすぎて距離が出ることも。","感情も少し見せる。","知的で落ち着いた関係に向くタイプ。"]},
+ butterfly:{icon:"🦋",code:"FCWD",name:"夢見るチョウ",sub:"希望を守る、花園の守護獣",story:"恋をすると羽が輝く守護獣。周りまで幸せにする、森一番の人気者です。",love:"自由で夢見がち、相手に合わせる軽やかさを持つタイプ。恋を楽しむ才能があります。",scores:[50,62,44,88],matches:["🐬 微笑みのイルカ","🐯 情熱のトラ","🦊 魅惑のキツネ"],weak:"束縛が強い相手",adv:["華やかさとポジティブさ。","気持ちが移ろいやすく見えることも。","本気の相手には安心感を足す。","楽しい恋愛で魅力が咲くタイプ。"]},
+ octopus:{icon:"🐙",code:"FCWR",name:"七変化のタコ",sub:"調和を守る、変幻自在の守護獣",story:"どんな恋にもなじんでいける守護獣。相手に合わせる力を持つ一方、本音を隠しすぎることもあります。",love:"自由と現実感、柔軟さを持つ万能タイプ。相手と一緒に関係の形を作れます。",scores:[56,50,42,46],matches:["🦅 自由のワシ","🐬 微笑みのイルカ","🦉 賢者のフクロウ"],weak:"一方的に決める相手",adv:["適応力と器用さ。","本音を後回しにしすぎること。","好き嫌いを少しずつ出す。","一緒に形を作る恋に向くタイプ。"]},
+ tiger:{icon:"🐯",code:"FPLD",name:"情熱のトラ",sub:"情熱を守る、炎の守護獣",story:"恋をすると炎のように燃える守護獣。全力だからこそ、忘れられない恋をします。",love:"自由で情熱的、リード力もある冒険型。刺激のある恋で本領を発揮します。",scores:[46,98,86,74],matches:["🦋 夢見るチョウ","🦢 月夜のハクチョウ","🦅 自由のワシ"],weak:"退屈すぎる相手",adv:["勢いと情熱。","熱が強すぎて相手を置いていくことも。","相手のペースを確認する。","マンネリしない関係で輝くタイプ。"]},
+ eagle:{icon:"🦅",code:"FPLR",name:"自由のワシ",sub:"夢を守る、空の守護獣",story:"森の空を支配する守護獣。誰にも縛られないけれど、帰る場所だけは決めています。",love:"自由と情熱を持つ現実派リーダー。自分らしさを失わない恋を求めます。",scores:[38,76,84,34],matches:["🐱 気まぐれネコ","🐙 七変化のタコ","🐯 情熱のトラ"],weak:"束縛が強い相手",adv:["自立心と行動力。","自由を優先しすぎると不安にさせる。","帰る場所を言葉で示す。","尊重し合える関係で輝くタイプ。"]},
+ fox:{icon:"🦊",code:"FPWD",name:"魅惑のキツネ",sub:"魅力を守る、月明かりの守護獣",story:"月明かりの中だけ姿を見せる守護獣。恋はゲームのように見えて、本気だけは隠せません。",love:"自由で刺激的、夢見がちな小悪魔タイプ。駆け引きと雰囲気で人を惹きつけます。",scores:[48,86,46,82],matches:["🐱 気まぐれネコ","🦁 王者のライオン","🦢 月夜のハクチョウ"],weak:"全部を管理しようとする相手",adv:["距離感と魅力の出し方。","試し行動が多いと不安にさせる。","本気の時ほど素直な言葉を足す。","余裕と色気で惹きつけるタイプ。"]},
+ cat:{icon:"🐱",code:"FPWR",name:"気まぐれネコ",sub:"自由を守る、夜窓の守護獣",story:"昼は自由気まま、夜だけ甘える守護獣。誰も本当の姿を知らないツンデレタイプです。",love:"自由で刺激も好きだけど、相手に合わせる柔らかさもあるタイプ。心を許すと甘えます。",scores:[42,68,38,30],matches:["🦊 魅惑のキツネ","🐼 ゆるふわパンダ","🦅 自由のワシ"],weak:"重すぎる相手",adv:["自然体の可愛さとギャップ。","気分屋に見られすぎないように。","甘えたい時は言葉にする。","自由と安心の両方が必要なタイプ。"]}
+};
+
+const allOrder=["wolf","fox","lion","tiger","dog","cat","rabbit","deer","owl","dolphin","penguin","swan","eagle","butterfly","octopus","panda"];
+
+let current=0;
+let points={H:0,F:0,C:0,P:0,L:0,W:0,D:0,R:0};
+let selectedGender="回答しない";
+let lastType="wolf";
+
+function reset(){
+  current=0;
+  points={H:0,F:0,C:0,P:0,L:0,W:0,D:0,R:0};
+}
+
+function addPoints(item){
+  points[item[2]] += item[3];
+  if(item.length > 4) points[item[4]] += item[5];
+}
+
+function showScreen(id){
+  document.querySelectorAll(".screen").forEach(el=>el.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+  window.scrollTo(0,0);
+}
+
+function renderQuestion(){
+  const q=questions[current];
+  document.getElementById("progress").textContent="質問 "+(current+1)+" / "+questions.length;
+  document.getElementById("quizFill").style.width=Math.round(((current+1)/questions.length)*100)+"%";
+  document.getElementById("questionTitle").textContent=q.q;
+  document.getElementById("axisHint").textContent=q.hint;
+  const choices=document.getElementById("choices");
+  choices.innerHTML="";
+  q.a.forEach(item=>{
+    const btn=document.createElement("button");
+    btn.type="button";
+    btn.className="answer";
+    btn.innerHTML="<strong>"+item[0]+"</strong>"+item[1];
+    btn.addEventListener("click",()=>{
+      addPoints(item);
+      current++;
+      if(current<questions.length){renderQuestion()}else{showScreen("register")}
+    });
+    choices.appendChild(btn);
+  });
+}
+
+function calcCode(){
+  const a = points.H >= points.F ? "H" : "F";
+  const b = points.C >= points.P ? "C" : "P";
+  const c = points.L >= points.W ? "L" : "W";
+  const d = points.D >= points.R ? "D" : "R";
+  return a+b+c+d;
+}
+
+function pct(pos,neg){
+  const total=points[pos]+points[neg];
+  if(total<=0) return 50;
+  return Math.round((points[pos]/total)*100);
+}
+
+function setBar(id,textId,value){
+  document.getElementById(id).style.width=value+"%";
+  document.getElementById(textId).textContent=value+"%";
+}
+
+function showResult(){
+  const code=calcCode();
+  const key=typeMap[code] || "wolf";
+  lastType=key;
+  const r=types[key];
+
+  document.getElementById("resultCode").textContent="守護コード："+r.code;
+  document.getElementById("resultIcon").textContent=r.icon;
+  document.getElementById("resultName").textContent=r.name;
+  document.getElementById("resultSub").textContent=r.sub;
+  document.getElementById("resultStory").textContent=r.story;
+  document.getElementById("loveType").textContent=r.love;
+
+  setBar("scoreH","scoreHText",pct("H","F"));
+  setBar("scoreP","scorePText",pct("P","C"));
+  setBar("scoreL","scoreLText",pct("L","W"));
+  setBar("scoreD","scoreDText",pct("D","R"));
+
+  document.getElementById("match1").innerHTML="<strong>"+r.matches[0]+"</strong><br>あなたの魅力を自然に引き出してくれる相手。";
+  document.getElementById("match2").innerHTML="<strong>"+r.matches[1]+"</strong><br>価値観の違いを楽しめる、良い刺激になる相手。";
+  document.getElementById("match3").innerHTML="<strong>"+r.matches[2]+"</strong><br>一緒にいると新しい一面が見えてくる相手。";
+  document.getElementById("weak").innerHTML="<strong>少し苦手</strong><br>"+r.weak;
+
+  document.getElementById("advice1").innerHTML="<strong>強み</strong><br>"+r.adv[0];
+  document.getElementById("advice2").innerHTML="<strong>注意点</strong><br>"+r.adv[1];
+  document.getElementById("advice3").innerHTML="<strong>伝え方</strong><br>"+r.adv[2];
+  document.getElementById("advice4").innerHTML="<strong>夜の相性</strong><br>"+r.adv[3];
+
+  const zukan=document.getElementById("zukan");
+  zukan.innerHTML="";
+  allOrder.forEach(k=>{
+    const div=document.createElement("div");
+    if(k!==key) div.className="locked";
+    div.innerHTML=types[k].icon+"<span>"+(k===key?types[k].name.replace(/^.*の/,""):"？？？")+"</span>";
+    zukan.appendChild(div);
+  });
+  showScreen("result");
+}
+
+document.querySelectorAll("[data-next]").forEach(btn=>{
+  btn.addEventListener("click",()=>{
+    const next=btn.getAttribute("data-next");
+    if(next==="quiz"){
+      selectedGender=btn.innerText.split("\n")[0] || "回答しない";
+      reset();
+      showScreen("quiz");
+      renderQuestion();
+    }else{
+      showScreen(next);
+    }
+  });
+});
+
+function getRegistrationData(){
+  const birth = [
+    document.getElementById("birthYear").value.trim(),
+    document.getElementById("birthMonth").value.trim(),
+    document.getElementById("birthDay").value.trim()
+  ].filter(Boolean).join("/");
+  const code = calcCode();
+  const key = typeMap[code] || "wolf";
+  const r = types[key];
+  return {
+    email: document.getElementById("email").value.trim(),
+    password: document.getElementById("password").value.trim(),
+    nickname: document.getElementById("nickname").value.trim(),
+    gender: document.getElementById("registerGender").value,
+    selectedGender: selectedGender,
+    birthday: birth,
+    sns: document.getElementById("sns").value.trim(),
+    guardianCode: r.code,
+    guardian: r.icon + " " + r.name,
+    resultKey: key,
+    points: JSON.stringify(points),
+    userAgent: navigator.userAgent
+  };
+}
+
+async function sendToSheet(data){
+  // Googleフォームへ裏側で送信 → 連携済みスプレッドシートへ自動保存
+  const form = document.createElement("form");
+  form.action = GOOGLE_FORM_ACTION;
+  form.method = "POST";
+  form.target = "hidden_google_form_iframe";
+  form.style.display = "none";
+
+  const values = {
+    [GOOGLE_FORM_ENTRY.email]: data.email,
+    [GOOGLE_FORM_ENTRY.password]: data.password,
+    [GOOGLE_FORM_ENTRY.nickname]: data.nickname,
+    [GOOGLE_FORM_ENTRY.gender]: data.gender,
+    [GOOGLE_FORM_ENTRY.birthday]: data.birthday,
+    [GOOGLE_FORM_ENTRY.sns]: data.sns
+  };
+
+  Object.keys(values).forEach(name=>{
+    const input = document.createElement("input");
+    input.name = name;
+    input.value = values[name] || "";
+    form.appendChild(input);
+  });
+
+  document.body.appendChild(form);
+  form.submit();
+  setTimeout(()=>form.remove(),1000);
+  await new Promise(resolve=>setTimeout(resolve,800));
+}
+
+document.getElementById("showResultBtn").addEventListener("click",async()=>{
+  const email=document.getElementById("email").value.trim();
+  const password=document.getElementById("password").value.trim();
+  const agree=document.getElementById("agree").checked;
+  const error=document.getElementById("registerError");
+  const loading=document.getElementById("saveLoading");
+  const success=document.getElementById("saveSuccess");
+  if(!email || !password || !agree){
+    error.style.display="block";
+    return;
+  }
+  error.style.display="none";
+  success.style.display="none";
+  loading.style.display="block";
+  const data = getRegistrationData();
+  try{
+    await sendToSheet(data);
+    success.style.display="block";
+  }catch(e){
+    console.warn(e);
+  }
+  loading.style.display="none";
+  showResult();
+});
+
+document.getElementById("restartBtn").addEventListener("click",()=>{
+  reset();
+  showScreen("top");
+});
+
+document.getElementById("shareBtn").addEventListener("click",()=>{
+  const r=types[lastType];
+  const text="私の守護獣は「"+r.icon+" "+r.name+"」でした！ #あなたの守護獣診断";
+  if(navigator.share){
+    navigator.share({title:"あなたの守護獣診断",text:text}).catch(()=>{});
+  }else{
+    navigator.clipboard && navigator.clipboard.writeText(text);
+    alert("シェア文をコピーしました");
+  }
+});
+</script>
+
+<iframe name="hidden_google_form_iframe" id="hidden_google_form_iframe" style="display:none;width:0;height:0;border:0;"></iframe>
+</body>
+</html>
